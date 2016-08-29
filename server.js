@@ -16,25 +16,25 @@ app.get('/', function (req, res) {
 
 //GET /todos
 app.get('/todos', function (req, res) {
-    var queryParams = req.query;
-    var filteredToDos = todos;
+    var query = req.query;
+    var where = {};
 
-    //search by completed
-   if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
-       filteredToDos = _.where(filteredToDos, {completed: true});
-   } else if ((queryParams.hasOwnProperty('completed') && queryParams.completed === 'false')) {
-       filteredToDos = _.where(filteredToDos, {completed: false});
-   }
-
-   //search by description
-
-   if (queryParams.hasOwnProperty('q') && queryParams.q.length > 0) {
-        filteredToDos = _.filter(filteredToDos, function(todo){
-            return todo.description.toLowerCase().indexOf(queryParams.q.toLowerCase()) > -1;
-        });
+    if (query.hasOwnProperty('completed') && query.completed === 'true') {
+        where.completed = true;
+    } else if (query.hasOwnProperty('completed') && query.completed === 'false') {
+        where.completed = false;
     }
-        res.json(filteredToDos);
+    if (query.hasOwnProperty('q') && query.q.length > 0) {
+        where.description = {
+            $like: '%' + query.q + '%'
+        };
+    }
 
+    db.todo.findAll({where: where}).then(function (todos) {
+        res.json(todos);
+    }, function(e) {
+        res.status(500).send();
+    })
 });
 
 //GET /todos/:id
@@ -83,7 +83,6 @@ app.put ('/todos/:id', function (req, res) {
     var todoID = parseInt(req.params.id, 10);
     var matchedTodo = _.findWhere(todos, {id: todoID});
     var body = _.pick(req.body, 'description', 'completed');
-    var validAttributes = {};
 
     if(!matchedTodo) {
         return res.status(404).send();
@@ -99,7 +98,8 @@ app.put ('/todos/:id', function (req, res) {
         validAttributes.description = body.description;
     } else if (body.hasOwnProperty('description')) {
         return res.status(400).send();
-    }
+    }var validAttributes = {};
+
 
    _.extend(matchedTodo, validAttributes);
 
