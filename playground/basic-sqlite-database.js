@@ -30,20 +30,6 @@ sequelize.sync().then(function() {
     }
     });
 });
-//
-//     Todo.create({
-//         description: 'feed the cat',
-//         completed: false
-//     }).then(function(todo) {
-//         return Todo.create({
-//             description: 'clean office'
-//         });
-//     }).then(function{
-//
-//     })
-//     }).catch(function(e) {
-//         console.log(e);
-//     });
-// });
+/
 
 
